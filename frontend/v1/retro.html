@@ -1,0 +1,429 @@
+<!--
+  Copyright (c) 2026 rebcoder. MIT licensed — see LICENSE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Sprint Retrospective Tool - Free Agile Team Improvement Tool | Scrum Ceremonies</title>
+  <meta name="description" content="Free Sprint Retrospective tool for agile teams. Conduct effective retrospectives with three-column boards: what went well, what to improve, and action items. No login required." />
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.write('<script src="config.local.js"><\/script>');
+  }
+  </script>
+  <script src="config.js"></script>
+  <script src="vendor/sockjs-1.6.1.min.js"></script>
+  <script src="vendor/stomp-2.3.3.min.js"></script>
+  <script src="cache-bust-utils.js"></script>
+  <script src="vendor/gsap-3.12.2.min.js"></script>
+  <!-- PDF Export Libraries -->
+  <script src="vendor/jspdf-2.5.1.umd.min.js" id="jspdf-script"></script>
+  <script src="vendor/html2canvas-1.4.1.min.js" id="html2canvas-script"></script>
+  <script>
+    (function() {
+      function initJsPDF() {
+        if (window.jspdf && window.jspdf.jsPDF) {
+          window.jsPDF = window.jspdf.jsPDF;
+        }
+      }
+      initJsPDF();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initJsPDF);
+      }
+      [100, 300, 500, 1000].forEach(delay => {
+        setTimeout(initJsPDF, delay);
+      });
+    })();
+  </script>
+
+  <!-- Structured Data - FAQ Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is the Sprint Retrospective tool free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, our Sprint Retrospective tool is completely free to use. There are no subscription fees, no credit card requirements, and no hidden costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to login to use the Retrospective tool?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No, you don't need to create an account or login. Simply create a board, share the board code with your team, and start your retrospective immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What retrospective formats are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Our tool supports the classic three-column format: What Went Well, What To Improve, and Action Items. Team members can add cards, vote on priorities, and collaborate in real-time."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I export my retrospective results?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, you can export your retrospective as a PDF to share with stakeholders and track progress over time."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured Data - SoftwareApplication Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Scrum Ceremonies Sprint Retrospective",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free Sprint Retrospective tool for agile teams. Conduct effective retrospectives with three-column boards. No login required, real-time collaboration, perfect for remote teams.",
+    "featureList": [
+      "Three-column retrospective format",
+      "Real-time collaboration",
+      "Team voting on cards",
+      "Search and filter functionality",
+      "PDF export",
+      "No login required",
+      "Free to use"
+    ]
+  }
+  </script>
+</head>
+<body class="retro-page">
+
+<div class="container">
+  <div class="page-header">
+    <h1>Sprint Retrospective</h1>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"><span class="ic" data-ic="moon" aria-hidden="true"></span></button>
+  </div>
+  <hr />
+
+  <div id="retro-room-section" class="join-game-container">
+    <div class="join-game-header">
+      <h2 class="join-game-title"><span aria-hidden="true" class="ic" data-ic="rocket"></span> Create Retrospective Board</h2>
+      <p class="join-game-subtitle">Gather insights and drive team improvement!</p>
+    </div>
+
+    <div class="join-game-form">
+      <div class="form-field">
+        <label class="field-label" for="retro-name-input"><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name</label>
+        <div class="input-wrapper">
+          <input id="retro-name-input" class="custom-input" placeholder="Enter your name..." maxlength="20" />
+        </div>
+        <span id="retro-name-error" class="error-message" role="alert" style="display:none;">Please enter your name.</span>
+      </div>
+
+      <div class="form-actions">
+        <button id="retro-create-room-btn" class="action-btn create-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+          <span class="btn-text">Create New Board</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-text">OR</span>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label" for="retro-room-code-input"><span aria-hidden="true" class="ic" data-ic="home"></span> Board Code</label>
+        <div class="join-room-wrapper">
+          <div class="input-wrapper">
+            <input id="retro-room-code-input" class="custom-input" placeholder="Enter 8-character board code" />
+          </div>
+          <button id="retro-join-room-btn" class="action-btn join-btn">
+            <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+            <span class="btn-text">Join</span>
+          </button>
+        </div>
+        <span id="retro-join-error" class="error-message" style="display:none;">Board not found. Check the code and try again.</span>
+        <div class="help-text"><span aria-hidden="true" class="ic" data-ic="lightbulb"></span> Share the board code with your team to collaborate in real time.</div>
+      </div>
+
+      <div class="form-footer">
+        <button id="retro-go-home-btn" class="secondary-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="home"></span>
+          <span class="btn-text">Back to Home</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Use Section -->
+  <div id="retro-rules-section" class="rules-section">
+    <p class="rules-section-title"><span aria-hidden="true" class="ic" data-ic="clipboard-list"></span> How to Use Sprint Retrospectives</p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="check-circle"></span> Went Well</p>
+        <p>Celebrate successes! Add cards for things that worked well during the sprint. These are practices worth continuing.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="alert-triangle"></span> Improve</p>
+        <p>Identify challenges and blockers. Add cards for areas that need attention or caused friction during the sprint.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="target"></span> Improvement Actions</p>
+        <p>Turn insights into actions! Create specific, measurable tasks the team will commit to for the next sprint.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="users"></span> Team Voting</p>
+        <p>Vote on cards to prioritize discussion topics. Focus on the most important issues identified by the team.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="search"></span> Search & Filter</p>
+        <p>Use the search bar to find specific topics. Sort by votes to see the highest priority items first.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="share"></span> Export Results</p>
+        <p>Export your retrospective as a PDF to share with stakeholders and track progress over time.</p>
+      </div>
+    </div>
+
+    <div class="best-practices-box" style="margin-top: 16px;">
+      <h4><span aria-hidden="true" class="ic" data-ic="star"></span> Best Practices for Effective Retrospectives</h4>
+      <ul>
+        <li><strong>Time-box discussions:</strong> Keep each topic focused and under 5 minutes</li>
+        <li><strong>Be specific:</strong> Use concrete examples rather than vague statements</li>
+        <li><strong>Focus on improvement:</strong> Frame problems as opportunities to learn</li>
+        <li><strong>Make it safe:</strong> Create an environment where everyone can speak openly</li>
+        <li><strong>Follow through:</strong> Track action items and review progress in the next retro</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="retro-room-info" class="room-info-section" style="display:none;">
+    <h2>
+      <span aria-hidden="true" class="ic" data-ic="home"></span> Board Code: <span id="retro-room-code" class="room-code-value"></span>
+      <button id="copy-retro-room-code-btn" class="copy-code-btn" title="Click to copy room code" aria-label="Copy room code to clipboard">
+        <span class="copy-icon ic" aria-hidden="true" data-ic="clipboard-list"></span>
+      </button>
+    </h2>
+    <h3><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name: <span id="retro-user-name" class="user-name-value"></span></h3>
+    <h3 class="team-name-row">
+      <span aria-hidden="true" class="ic" data-ic="users"></span> Team: <span id="retro-team-name" class="team-name-value"></span>
+    </h3>
+    <h3 id="retro-host-info" class="text-center" style="display:none;"><span aria-hidden="true" class="ic" data-ic="crown"></span> Hosted by: <span id="retro-host-name" class="host-name-value"></span></h3>
+    <div class="room-info-actions">
+      <button id="retro-share-btn" class="v1-btn v1-btn-warning"><span aria-hidden="true" class="ic" data-ic="link"></span> Share</button>
+      <button id="retro-export-pdf-btn" class="v1-btn v1-btn-success"><span aria-hidden="true" class="ic" data-ic="share"></span> Export PDF</button>
+      <button id="retro-go-home-top-btn" class="v1-btn v1-btn-ghost"><span aria-hidden="true" class="ic" data-ic="home"></span> Home</button>
+    </div>
+  </div>
+
+  <div id="retro-board" class="board-container" style="display:none;">
+    <!-- Enhanced Toolbar -->
+    <div class="retro-toolbar-enhanced">
+      <div class="toolbar-left">
+        <div class="participants-counter">
+          <div class="counter-row">
+            <span class="counter-icon ic" aria-hidden="true" data-ic="users"></span>
+            <span class="counter-text">Team Members:</span>
+            <span id="retro-user-count" class="counter-number">0</span>
+          </div>
+          <div id="retro-team-members-list" class="team-members-list" style="display:none;"></div>
+        </div>
+        <div class="session-status">
+          <span class="status-icon ic" aria-hidden="true" data-ic="target"></span>
+          <span class="status-text">Active Session</span>
+        </div>
+        <span id="retro-remaining-votes" class="remaining-votes-badge">5/5 votes left</span>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="retro-timer-section">
+          <span id="retro-timer-display" class="retro-timer-display" style="display:none;">10:00</span>
+          <button id="retro-timer-start-btn" class="retro-timer-btn" onclick="retroHandleTimerStart()" title="Start 10-minute discussion timer" aria-label="Start discussion timer">
+            <span class="btn-icon" aria-hidden="true">⏱️</span>
+            <span class="btn-text">Start Timer</span>
+          </button>
+        </div>
+        <div class="search-container">
+          <div class="search-wrapper">
+            <span class="search-icon ic" aria-hidden="true" data-ic="search"></span>
+            <input id="retro-search" class="enhanced-search-input" placeholder="Search notes and ideas..." aria-label="Search retrospective notes" />
+          </div>
+        </div>
+        <button id="retro-sort-votes" class="sort-toggle-btn" aria-pressed="false">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="bar-chart"></span>
+          <span class="btn-text">Sort by Votes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Enhanced Board Grid -->
+    <div class="retro-board-grid">
+      <!-- Went Well Column -->
+      <div class="retro-column-enhanced went-well-column" data-column="wentWell">
+        <div class="column-header">
+          <div class="column-icon went-well-icon ic" aria-hidden="true" data-ic="check-circle"></div>
+          <h3 class="column-title">Went Well</h3>
+          <div class="column-subtitle">Celebrate what worked</div>
+        </div>
+        <div class="retro-cards-container" id="wentWell">
+          <div class="cards-scroll-area"></div>
+        </div>
+        <div class="add-card-section">
+          <div class="add-card-input-wrapper">
+            <textarea id="wentWell-input" class="add-card-input" placeholder="What went well this sprint?" aria-label="Add note to Went Well column" rows="1" maxlength="180"></textarea>
+            <button class="add-card-btn went-well-btn" data-column="wentWell" aria-label="Add card to Went Well">
+              <span class="add-icon" aria-hidden="true">+</span>
+              <span class="add-text">Add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- To Improve Column -->
+      <div class="retro-column-enhanced to-improve-column" data-column="toImprove">
+        <div class="column-header">
+          <div class="column-icon to-improve-icon ic" aria-hidden="true" data-ic="alert-triangle"></div>
+          <h3 class="column-title">Improve</h3>
+          <div class="column-subtitle">Identify challenges</div>
+        </div>
+        <div class="retro-cards-container" id="toImprove">
+          <div class="cards-scroll-area"></div>
+        </div>
+        <div class="add-card-section">
+          <div class="add-card-input-wrapper">
+            <textarea id="toImprove-input" class="add-card-input" placeholder="What could be improved?" aria-label="Add note to Improve column" rows="1" maxlength="180"></textarea>
+            <button class="add-card-btn to-improve-btn" data-column="toImprove" aria-label="Add card to Improve">
+              <span class="add-icon" aria-hidden="true">+</span>
+              <span class="add-text">Add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Items Column -->
+      <div class="retro-column-enhanced action-items-column" data-column="actionItems">
+        <div class="column-header">
+          <div class="column-icon action-items-icon ic" aria-hidden="true" data-ic="target"></div>
+          <h3 class="column-title">Improvement Actions</h3>
+          <div class="column-subtitle">Plan for next sprint</div>
+        </div>
+        <div class="retro-cards-container" id="actionItems">
+          <div class="cards-scroll-area"></div>
+        </div>
+        <div class="add-card-section">
+          <div class="add-card-input-wrapper">
+            <textarea id="actionItems-input" class="add-card-input" placeholder="What actions will we take?" aria-label="Add note to Improvement Actions column" rows="1"></textarea>
+            <button class="add-card-btn action-items-btn" data-column="actionItems" aria-label="Add card to Improvement Actions">
+              <span class="add-icon" aria-hidden="true">+</span>
+              <span class="add-text">Add</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board Footer with Quick Actions -->
+    <div class="board-footer">
+      <div class="quick-actions">
+        <div class="footer-stats">
+          <span class="stat-item">
+            <span class="stat-icon ic" aria-hidden="true" data-ic="file-text"></span>
+            <span class="stat-value" id="total-cards">0</span>
+            <span class="stat-label">Total Notes</span>
+          </span>
+          <span class="stat-item">
+            <span class="stat-icon ic" aria-hidden="true" data-ic="thumbs-up"></span>
+            <span class="stat-value" id="total-votes">0</span>
+            <span class="stat-label">Total Votes</span>
+          </span>
+        </div>
+        <div class="board-actions">
+          <button class="board-action-btn clear-all-btn" id="clear-all-cards" style="display:none;">
+            <span class="btn-icon ic" aria-hidden="true" data-ic="trash"></span>
+            <span class="btn-text">Clear All</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Name Input Modal -->
+  <div id="retro-name-modal" class="name-input-modal-backdrop" style="display:none;">
+    <div class="name-input-modal">
+      <div class="modal-header">
+        <div class="modal-icon ic" aria-hidden="true" data-ic="hand"></div>
+        <h2 class="modal-title">Welcome to the Retrospective!</h2>
+        <p class="modal-subtitle">Please enter your name to join the team session</p>
+      </div>
+
+      <div class="modal-content">
+        <div class="modal-input-wrapper">
+          <label class="modal-input-label" for="retro-modal-name-input">Your Name</label>
+          <input id="retro-modal-name-input" class="modal-name-input" placeholder="Enter your name..." maxlength="20" />
+          <span id="retro-modal-name-error" class="modal-error-message" role="alert" style="display:none;">Please enter a valid name (1-20 characters)</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="retro-modal-cancel" class="modal-btn modal-btn-secondary">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="log-out"></span>
+          <span class="btn-text">Cancel</span>
+        </button>
+        <button id="retro-modal-continue" class="modal-btn modal-btn-primary">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="rocket"></span>
+          <span class="btn-text">Join Session</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirm-dialog-backdrop" class="confirm-dialog-backdrop" style="display:none;">
+    <div class="confirm-dialog">
+      <div class="confirm-dialog-icon ic" aria-hidden="true" data-ic="alert-triangle"></div>
+      <h3 class="confirm-dialog-title">Are you sure?</h3>
+      <p class="confirm-dialog-message" id="confirm-dialog-message">This action cannot be undone.</p>
+      <div class="confirm-dialog-actions">
+        <button id="confirm-dialog-cancel" class="modal-btn modal-btn-secondary">
+          <span class="btn-text">Cancel</span>
+        </button>
+        <button id="confirm-dialog-confirm" class="modal-btn confirm-dialog-danger-btn">
+          <span class="btn-text">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Toast Container -->
+  <div id="retro-toast-container" class="toast-container" aria-live="polite" role="status"></div>
+</div>
+
+<script src="shared.js"></script>
+<script src="retro.js"></script>
+<script src="share-modal.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    setupHostNamePolling({
+      roomCodeId: 'retro-room-code',
+      hostInfoId: 'retro-host-info',
+      hostNameId: 'retro-host-name',
+      apiEndpoint: '/api/retro/state',
+      globalFnName: 'updateRetroHostNameFromState'
+    });
+  });
+</script>
+</body>
+</html>

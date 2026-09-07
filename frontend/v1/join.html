@@ -1,0 +1,444 @@
+<!--
+  Copyright (c) 2026 rebcoder. MIT licensed — see LICENSE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Join Room - Scrum Ceremonies</title>
+
+  <!-- Open Graph Meta Tags (will be updated dynamically) -->
+  <meta property="og:title" content="Join Room - Scrum Ceremonies" id="og-title" />
+  <meta property="og:description" content="Click to join the room" id="og-description" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="" id="og-url" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="poker-page">
+
+<div class="join-backdrop" id="join-modal-backdrop">
+  <div class="join-modal-card" id="join-modal">
+    <!-- Loading State -->
+    <div id="loading" style="display: none;">
+      <div class="join-loading-container">
+        <div class="join-spinner"></div>
+        <p class="join-loading-text">Loading room information...</p>
+      </div>
+    </div>
+
+    <!-- Room Info State -->
+    <div id="room-info" style="display: none;">
+      <div class="join-modal-header">
+        <h3 class="join-modal-title" id="room-title">Join Room</h3>
+        <button id="close-join-modal-btn" class="join-modal-close" aria-label="Close"><span class="ic" data-ic="x" aria-hidden="true"></span></button>
+      </div>
+      <div class="join-modal-body">
+        <p class="join-host-subtitle" id="room-subtitle">Hosted by <span id="host-name">Anonymous</span></p>
+
+        <div class="join-form-field">
+          <label class="field-label" for="join-name-input">Your Name</label>
+          <div class="input-wrapper">
+            <input id="join-name-input" class="custom-input" placeholder="Enter your name..." maxlength="20" />
+          </div>
+          <span id="join-name-error" class="error-message" style="display:none;">Please enter your name.</span>
+        </div>
+
+        <div class="join-actions">
+          <button id="join-room-btn" class="action-btn create-btn join-page-btn">
+            <span class="btn-icon ic" data-ic="rocket" aria-hidden="true"></span>
+            <span class="btn-text">Join Room</span>
+          </button>
+          <button id="go-home-btn" class="secondary-btn join-page-btn">
+            <span class="btn-icon ic" data-ic="home" aria-hidden="true"></span>
+            <span class="btn-text">Back to Home</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-message" style="display: none;">
+      <div class="join-modal-header">
+        <h3 class="join-modal-title join-error-title">Room Not Found</h3>
+        <button id="close-error-modal-btn" class="join-modal-close" aria-label="Close"><span class="ic" data-ic="x" aria-hidden="true"></span></button>
+      </div>
+      <div class="join-modal-body" style="text-align: center;">
+        <div class="join-error-emoji ic" data-ic="frown" aria-hidden="true"></div>
+        <p class="join-error-text" id="error-text">The room you're looking for doesn't exist or has expired.</p>
+        <button id="error-home-btn" class="secondary-btn join-page-btn">
+          <span class="btn-icon ic" data-ic="home" aria-hidden="true"></span>
+          <span class="btn-text">Go to Home</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Join Page */
+.join-backdrop {
+  align-items: center;
+  background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.join-modal-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-2);
+  max-width: 460px;
+  width: 100%;
+}
+
+.join-modal-header {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.join-modal-title {
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.join-error-title {
+  color: var(--color-danger);
+}
+
+.join-modal-close {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  font-size: 16px;
+  height: 32px;
+  justify-content: center;
+  transition: all 0.15s ease;
+  width: 32px;
+}
+
+.join-modal-close:hover {
+  background: var(--color-bg);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text);
+}
+
+.join-modal-body {
+  padding: 24px;
+}
+
+.join-host-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.join-host-subtitle span {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.join-form-field {
+  margin-bottom: 24px;
+}
+
+.join-form-field .field-label {
+  color: var(--color-text);
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.join-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.join-page-btn {
+  width: 100%;
+}
+
+/* Loading */
+.join-loading-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 60px 40px;
+}
+
+.join-spinner {
+  animation: join-spin 0.8s linear infinite;
+  border: 3px solid var(--color-border);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  height: 32px;
+  width: 32px;
+}
+
+@keyframes join-spin {
+  to { transform: rotate(360deg); }
+}
+
+.join-loading-text {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Error */
+.join-error-emoji {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.join-error-text {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+/* Dark mode */
+[data-theme="dark"] .join-backdrop {
+  background: var(--color-bg);
+}
+
+[data-theme="dark"] .join-modal-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .join-backdrop {
+    padding: 16px;
+  }
+
+  .join-modal-body {
+    padding: 20px 16px;
+  }
+}
+</style>
+
+<script>
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  document.write('<script src="config.local.js"><\/script>');
+}
+</script>
+<script src="config.js"></script>
+<script>
+// Dark mode
+(function() {
+  const theme = localStorage.getItem('ceremonies_theme') || 'light';
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+(function() {
+  // Extract room type and room ID from URL (path /join/type/id or query ?type= &room=)
+  let roomType = null;
+  let roomId = null;
+  const pathParts = window.location.pathname.split('/').filter(p => p);
+  const pathJoinIndex = pathParts.indexOf('join');
+  if (pathJoinIndex >= 0 && pathParts.length >= pathJoinIndex + 3) {
+    roomType = pathParts[pathJoinIndex + 1];
+    roomId = pathParts[pathJoinIndex + 2];
+  }
+  if ((!roomType || !roomId) && window.location.search) {
+    const params = new URLSearchParams(window.location.search);
+    roomType = params.get('type');
+    roomId = params.get('room');
+  }
+  if (!roomType || !roomId) {
+    showError('Invalid room URL');
+    return;
+  }
+
+  // Update Open Graph tags
+  const baseUrl = window.location.origin + window.location.pathname;
+  document.getElementById('og-url').content = baseUrl;
+
+  // Fetch room information
+  fetch(APP_CONFIG.API_BASE_URL + `/api/rooms/${roomType}/${roomId}/public`)
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.error || 'Room not found');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      const roomTypeIcons = {
+        'poker': 'layers',
+        'retro': 'clipboard-list',
+        'mood': 'brain'
+      };
+      const joinActionText = {
+        'poker': 'Room',
+        'retro': 'Board',
+        'mood': 'Room'
+      };
+
+      const joinText = joinActionText[data.roomType] || 'Room';
+      const titleEl = document.getElementById('room-title');
+      titleEl.innerHTML =
+        `<span class="ic" data-ic="${roomTypeIcons[data.roomType] || 'target'}" aria-hidden="true"></span> Join ${joinText}`;
+      if (typeof window.hydrateIcons === 'function') window.hydrateIcons(titleEl);
+
+      // Update button text based on room type
+      const joinButton = document.getElementById('join-room-btn');
+      const buttonText = joinButton.querySelector('.btn-text');
+      if (data.roomType === 'retro') {
+        buttonText.textContent = 'Join Board';
+      } else {
+        buttonText.textContent = 'Join Room';
+      }
+
+      // Handle host name display
+      const hasHost = data.hasHost && data.hostName;
+      const hostName = data.hostName || 'Anonymous';
+      const roomSubtitle = document.getElementById('room-subtitle');
+
+      if (hasHost) {
+        document.getElementById('host-name').textContent = hostName;
+        roomSubtitle.innerHTML = 'Hosted by <span>' + hostName + '</span>';
+        roomSubtitle.style.display = 'block';
+      } else {
+        roomSubtitle.innerHTML = '<span>New Room</span> — Be the first to join!';
+        roomSubtitle.style.display = 'block';
+        document.getElementById('host-name').style.display = 'none';
+      }
+
+      // Update Open Graph tags
+      const roomTypeNames = {
+        'poker': 'Scrum Poker Room',
+        'retro': 'Sprint Retrospective Board',
+        'mood': 'Team Mood Check Room'
+      };
+      const ogTitleText = data.roomType === 'retro' ? 'Sprint Retrospective Board' : roomTypeNames[data.roomType] || 'Room';
+      document.getElementById('og-title').content = 'Join ' + ogTitleText;
+      if (hasHost) {
+        document.getElementById('og-description').content =
+          'Hosted by ' + hostName + '. Click to join.';
+      } else {
+        const newRoomText = data.roomType === 'retro' ? 'board' : 'room';
+        document.getElementById('og-description').content =
+          'New ' + newRoomText + '. Be the first to join!';
+      }
+
+      // Show room info
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('room-info').style.display = 'block';
+      document.getElementById('error-message').style.display = 'none';
+
+      // Handle join button
+      document.getElementById('join-room-btn').addEventListener('click', () => {
+        const nameInput = document.getElementById('join-name-input');
+        const name = (nameInput.value || '').trim();
+        const errorSpan = document.getElementById('join-name-error');
+
+        if (!name) {
+          errorSpan.style.display = 'block';
+          nameInput.focus();
+          return;
+        }
+
+        if (name.length > 20) {
+          errorSpan.textContent = 'Name must be 20 characters or less';
+          errorSpan.style.display = 'block';
+          nameInput.focus();
+          return;
+        }
+
+        errorSpan.style.display = 'none';
+
+        // Save the name to sessionStorage based on room type
+        if (data.roomType === 'poker') {
+          sessionStorage.setItem('scrumPokerUsername', name);
+        } else if (data.roomType === 'retro') {
+          sessionStorage.setItem('retroUserName', name);
+        } else if (data.roomType === 'mood') {
+          sessionStorage.setItem('moodUserName', name);
+        }
+
+        // Redirect to the appropriate room page
+        const redirectUrls = {
+          'poker': '/poker?room=' + roomId,
+          'retro': '/retro?room=' + roomId,
+          'mood': '/mood?room=' + roomId
+        };
+
+        const redirectUrl = redirectUrls[data.roomType] || '/index.html';
+        window.location.href = redirectUrl;
+      });
+
+      // Handle name input Enter key
+      document.getElementById('join-name-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('join-room-btn').click();
+        }
+      });
+    })
+    .catch(error => {
+      showError(error.message || 'Failed to load room information');
+    });
+
+  function showError(message) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('room-info').style.display = 'none';
+    document.getElementById('error-message').style.display = 'block';
+    document.getElementById('error-text').textContent = message;
+  }
+
+  // Show loading initially
+  document.getElementById('loading').style.display = 'block';
+
+  // Home button handlers
+  document.getElementById('go-home-btn')?.addEventListener('click', () => {
+    window.location.href = '/index.html';
+  });
+  document.getElementById('error-home-btn')?.addEventListener('click', () => {
+    window.location.href = '/index.html';
+  });
+
+  // Close modal handlers
+  document.getElementById('close-join-modal-btn')?.addEventListener('click', () => {
+    window.location.href = '/index.html';
+  });
+  document.getElementById('close-error-modal-btn')?.addEventListener('click', () => {
+    window.location.href = '/index.html';
+  });
+
+  // Close on backdrop click
+  document.getElementById('join-modal-backdrop')?.addEventListener('click', (e) => {
+    if (e.target.id === 'join-modal-backdrop') {
+      window.location.href = '/index.html';
+    }
+  });
+})();
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

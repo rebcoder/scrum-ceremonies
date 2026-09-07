@@ -1,0 +1,315 @@
+<!--
+  Copyright (c) 2026 rebcoder. MIT licensed — see LICENSE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Scrum Poker Online - Free Planning Poker Tool for Agile Teams | Scrum Ceremonies</title>
+  <meta name="description" content="Free online Scrum Poker (Planning Poker) tool for agile teams. Estimate backlog items collaboratively with your team. No login required. Perfect for remote teams, startups, and agencies." />
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.write('<script src="config.local.js"><\/script>');
+  }
+  </script>
+  <script src="config.js"></script>
+  <script src="vendor/sockjs-1.6.1.min.js"></script>
+  <script src="vendor/stomp-2.3.3.min.js"></script>
+  <script src="cache-bust-utils.js"></script>
+  <!-- Structured Data - FAQ Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Scrum Poker free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, our Scrum Poker tool is completely free to use. There are no subscription fees, no credit card requirements, and no hidden costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to login to use Planning Poker?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No, you don't need to create an account or login. Simply create a room, share the room code with your team, and start estimating backlog items immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Planning Poker suitable for remote teams?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, our Planning Poker tool is designed specifically for remote and distributed teams. All team members can vote simultaneously and see results in real-time, regardless of their location."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Planning Poker work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Planning Poker is a consensus-based estimation technique. Team members select cards representing their estimate (using Fibonacci numbers: 1, 2, 3, 5, 8, 13, 20), vote simultaneously to avoid bias, then discuss differences to reach consensus."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Structured Data - SoftwareApplication Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Scrum Ceremonies Planning Poker",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free online Planning Poker tool for agile teams to estimate backlog items collaboratively. No login required, real-time collaboration, perfect for remote teams.",
+    "featureList": [
+      "Real-time collaborative voting",
+      "Fibonacci sequence card values",
+      "Simultaneous voting to avoid bias",
+      "No login required",
+      "Free to use",
+      "Remote-friendly"
+    ]
+  }
+  </script>
+</head>
+<body class="poker-page">
+
+<div class="container">
+    <div class="page-header">
+      <h1>Scrum Planning Poker</h1>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"><span class="ic" data-ic="moon" aria-hidden="true"></span></button>
+    </div>
+    <hr />
+
+  <!-- Room Creation Section -->
+  <div id="room-section" class="join-game-container">
+    <div class="join-game-header">
+      <h2 class="join-game-title"><span aria-hidden="true" class="ic" data-ic="layers"></span> Create Planning Poker Room</h2>
+      <p class="join-game-subtitle">Estimate backlog items together with your team!</p>
+    </div>
+
+    <div class="join-game-form">
+      <div class="form-field">
+        <label class="field-label" for="poker-name-input"><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name</label>
+        <div class="input-wrapper">
+          <input id="poker-name-input" class="custom-input" placeholder="Enter your name..." maxlength="20" />
+        </div>
+        <span id="poker-name-error" class="error-message" role="alert" style="display:none;">Please enter your name.</span>
+      </div>
+
+      <div class="form-actions">
+        <button id="create-room-btn" class="action-btn create-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+          <span class="btn-text">Create New Room</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-text">OR</span>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label" for="room-code-input"><span aria-hidden="true" class="ic" data-ic="home"></span> Room Code</label>
+        <div class="join-room-wrapper">
+          <div class="input-wrapper">
+            <input id="room-code-input" class="custom-input" placeholder="Enter 8-character room code" />
+          </div>
+          <button id="join-room-btn" class="action-btn join-btn">
+            <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+            <span class="btn-text">Join</span>
+          </button>
+        </div>
+        <span id="poker-join-error" class="error-message" role="alert" style="display:none;">Room not found. Check the code and try again.</span>
+        <div class="help-text"><span aria-hidden="true" class="ic" data-ic="lightbulb"></span> Share the room code with your team to collaborate in real time.</div>
+      </div>
+
+      <div class="form-footer">
+        <button id="go-home-btn" class="secondary-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="home"></span>
+          <span class="btn-text">Back to Home</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Use Section -->
+  <div id="poker-rules-section" class="rules-section">
+    <p class="rules-section-title"><span aria-hidden="true" class="ic" data-ic="clipboard-list"></span> How to Use Planning Poker</p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="layers"></span> Select Your Card</p>
+        <p>Choose a card value that represents your estimate for the backlog item. Use Fibonacci numbers (1, 2, 3, 5, 8, 13, 20) or the coffee cup (<span aria-hidden="true">☕</span>) if you need clarification.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="users"></span> Team Collaboration</p>
+        <p>All team members vote independently. Wait for everyone to submit their votes before revealing results to avoid bias.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="search"></span> Reveal Votes</p>
+        <p>Once everyone has voted, reveal all votes to see the team's estimates. Discuss any significant differences in estimates.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="refresh"></span> Discuss & Re-vote</p>
+        <p>If estimates vary widely, discuss the story requirements and vote again until the team reaches consensus.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="bar-chart"></span> Track Progress</p>
+        <p>Use the room code to return to the same room later. All participants and votes are synchronized in real time.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="target"></span> Best Practices</p>
+        <p>Keep stories small and well-defined. Use relative sizing rather than absolute time estimates. Focus on complexity, not effort.</p>
+      </div>
+    </div>
+
+    <div class="best-practices-box" style="margin-top: 16px;">
+      <h4><span aria-hidden="true" class="ic" data-ic="star"></span> Planning Poker Best Practices</h4>
+      <ul>
+        <li><strong>Time-box discussions:</strong> Keep story discussions focused and under 5 minutes</li>
+        <li><strong>Use Fibonacci sequence:</strong> The gaps between numbers help teams avoid false precision</li>
+        <li><strong>Vote independently:</strong> Don't discuss estimates before everyone has voted</li>
+        <li><strong>Clarify requirements:</strong> Use the coffee cup (<span aria-hidden="true">☕</span>) if the story needs more detail</li>
+        <li><strong>Reach consensus:</strong> Discuss differences and re-vote until the team agrees</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Room Info -->
+  <div id="room-info" class="room-info-section" style="display:none;">
+    <h2>
+      <span aria-hidden="true" class="ic" data-ic="home"></span> Room Code: <span id="room-code" class="room-code-value"></span>
+      <button id="copy-room-code-btn" class="copy-code-btn" title="Click to copy room code" aria-label="Copy room code to clipboard">
+        <span class="copy-icon ic" aria-hidden="true" data-ic="clipboard-list"></span>
+      </button>
+    </h2>
+    <h3><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name: <span id="user-name" class="user-name-value"></span></h3>
+    <h3 class="team-name-row">
+      <span aria-hidden="true" class="ic" data-ic="users"></span> Team: <span id="team-name" class="team-name-value"></span>
+    </h3>
+    <h3 id="host-info" style="display:none; text-align: center;"><span aria-hidden="true" class="ic" data-ic="crown"></span> Hosted by: <span id="host-name" class="host-name-value"></span></h3>
+    <div class="room-info-actions">
+      <button id="share-btn" class="v1-btn v1-btn-warning"><span aria-hidden="true" class="ic" data-ic="link"></span> Share</button>
+      <button id="go-home-top-btn" class="v1-btn v1-btn-ghost"><span aria-hidden="true" class="ic" data-ic="home"></span> Home</button>
+    </div>
+  </div>
+
+  <!-- Voting Section -->
+  <div id="voting-section" class="board-container" style="display:none;">
+    <div class="retro-toolbar-enhanced">
+      <div class="toolbar-left">
+        <div class="participants-counter">
+          <div class="counter-row">
+            <span class="counter-icon ic" aria-hidden="true" data-ic="users"></span>
+            <span class="counter-text">Participants:</span>
+            <span id="user-count" class="counter-number">0</span>
+          </div>
+          <div id="team-members-list" class="team-members-list" style="display:none;"></div>
+        </div>
+        <div class="session-status">
+          <span class="status-icon ic" aria-hidden="true" data-ic="layers"></span>
+          <span class="status-text">Active Session</span>
+        </div>
+        <div class="session-status">
+          <span class="status-icon ic" aria-hidden="true" data-ic="user"></span>
+          <span class="status-text">Capacity: <span id="current-users">0</span>/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="poker-section-header">
+      <h2 class="poker-section-title">Select Your Estimate</h2>
+      <p class="poker-section-subtitle">Choose a card value that represents your estimate</p>
+    </div>
+
+    <div class="poker-cards-wrapper">
+      <div class="cards">
+        <button class="vote-btn" data-value="1" aria-label="Vote 1 point">1</button>
+        <button class="vote-btn" data-value="2" aria-label="Vote 2 points">2</button>
+        <button class="vote-btn" data-value="3" aria-label="Vote 3 points">3</button>
+        <button class="vote-btn" data-value="5" aria-label="Vote 5 points">5</button>
+        <button class="vote-btn" data-value="8" aria-label="Vote 8 points">8</button>
+        <button class="vote-btn" data-value="13" aria-label="Vote 13 points">13</button>
+        <button class="vote-btn" data-value="20" aria-label="Vote 20 points">20</button>
+        <button class="vote-btn" data-value="☕" aria-label="Vote coffee break">☕</button>
+      </div>
+    </div>
+
+    <div class="poker-action-buttons">
+      <button id="reveal-votes-btn" class="action-btn create-btn poker-reveal-btn">
+        <span class="btn-icon ic" aria-hidden="true" data-ic="search"></span>
+        <span class="btn-text">Reveal Votes</span>
+      </button>
+      <button id="clear-votes-btn" class="v1-btn v1-btn-danger">
+        <span class="btn-icon ic" aria-hidden="true" data-ic="trash"></span>
+        <span class="btn-text">Clear Votes</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Users Section -->
+  <div id="users-section" class="board-container" style="display:none;">
+    <h2 class="poker-section-title"><span aria-hidden="true" class="ic" data-ic="users"></span> Participants</h2>
+    <div class="users-container">
+      <ul id="users-list" class="poker-users-list"></ul>
+    </div>
+  </div>
+
+  <!-- Votes Section -->
+  <div id="votes-section" class="board-container" style="display:none;">
+    <h2 class="poker-section-title"><span aria-hidden="true" class="ic" data-ic="bar-chart"></span> Votes</h2>
+    <div id="vote-summary" class="vote-summary" style="display:none;">
+      <div class="vote-summary-stat">
+        <span class="vote-summary-label">Average</span>
+        <span id="vote-avg" class="vote-summary-value"></span>
+      </div>
+      <div class="vote-summary-stat">
+        <span class="vote-summary-label">Lowest</span>
+        <span id="vote-min" class="vote-summary-value vote-summary-min"></span>
+      </div>
+      <div class="vote-summary-stat">
+        <span class="vote-summary-label">Highest</span>
+        <span id="vote-max" class="vote-summary-value vote-summary-max"></span>
+      </div>
+      <div class="vote-summary-stat">
+        <span class="vote-summary-label">Consensus</span>
+        <span id="vote-consensus" class="vote-summary-value"></span>
+      </div>
+    </div>
+    <ul id="votes-list" class="poker-votes-list"></ul>
+  </div>
+
+  <!-- Toast Container (used for copy/share feedback) -->
+  <div id="toast-container" class="toast-container" aria-live="polite" role="status"></div>
+</div>
+
+<script src="shared.js"></script>
+<script src="script.js"></script>
+<script src="share-modal.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    setupHostNamePolling({
+      roomCodeId: 'room-code',
+      hostInfoId: 'host-info',
+      hostNameId: 'host-name',
+      apiEndpoint: '/api/room-state',
+      globalFnName: 'updateHostNameFromState'
+    });
+  });
+</script>
+</body>
+</html>

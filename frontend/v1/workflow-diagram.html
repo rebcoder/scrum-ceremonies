@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow Diagram - Scrum Ceremonies</title>
+  <style>
+    /* ============================================
+       RESET & BASE STYLES
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* ============================================
+       WORKFLOW CONTAINER
+       ============================================ */
+    .workflow-container {
+      width: 100%;
+      max-width: 900px;
+      padding: 3rem 2rem;
+    }
+
+    .workflow-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.2s forwards;
+    }
+
+    /* ============================================
+       WORKFLOW STEPS (HORIZONTAL ON DESKTOP)
+       ============================================ */
+    .workflow-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================
+       STEP CARDS
+       ============================================ */
+    .step {
+      flex: 1;
+      min-width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      opacity: 0.3;
+      transform: scale(0.95);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .step.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .step-card {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background: #f5f5f5;
+      border: 1.5px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .step.active .step-card {
+      background: #ffffff;
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Step 1: Tool Icons */
+    .step-1 .step-card {
+      border-radius: 50%;
+    }
+
+    .tool-icons-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tool-icon {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .tool-icon:nth-child(1) { 
+      transform: translateX(-20px) scale(0); 
+      transition-delay: 0s;
+    }
+    .tool-icon:nth-child(2) { 
+      transform: translateX(0) scale(0); 
+      transition-delay: 0.1s;
+    }
+    .tool-icon:nth-child(3) { 
+      transform: translateX(20px) scale(0); 
+      transition-delay: 0.2s;
+    }
+
+    .step-1.active .tool-icon {
+      opacity: 0.4;
+      transform: translateX(0) scale(0.8);
+    }
+
+    .step-1.active .tool-icon.active-tool {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      z-index: 1;
+      transition-delay: 0.3s;
+    }
+
+    /* Step 2: Room Card */
+    .step-2 .step-card {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+    }
+
+    .step-2.active .step-card {
+      transform: scale(1.1);
+      border-radius: 16px;
+    }
+
+    .room-icon {
+      font-size: 1.8rem;
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    .step-2.active .room-icon {
+      opacity: 1;
+      transform: scale(1);
+      animation: roomPulse 1s ease-in-out infinite;
+    }
+
+    /* Step 3: Link Icon */
+    .link-icon {
+      font-size: 1.8rem;
+      opacity: 0;
+      transform: scale(0) translateX(-10px);
+    }
+
+    .step-3.active .link-icon {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      animation: linkExtend 0.6s ease-out, linkPulse 1.2s ease-in-out 0.6s infinite;
+    }
+
+    /* Step 4: Collaboration (User Dots) */
+    .collaboration-dots {
+      display: flex;
+      gap: 6px;
+      opacity: 0;
+    }
+
+    .step-4.active .collaboration-dots {
+      opacity: 1;
+    }
+
+    .user-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #3b82f6;
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    .step-4.active .user-dot:nth-child(1) {
+      animation: dotAppear 0.3s ease-out 0.1s forwards, dotBounce 1s ease-in-out 0.4s infinite;
+    }
+
+    .step-4.active .user-dot:nth-child(2) {
+      animation: dotAppear 0.3s ease-out 0.2s forwards, dotBounce 1s ease-in-out 0.5s infinite;
+    }
+
+    .step-4.active .user-dot:nth-child(3) {
+      animation: dotAppear 0.3s ease-out 0.3s forwards, dotBounce 1s ease-in-out 0.6s infinite;
+    }
+
+    /* Step 5: Exit Checkmark */
+    .checkmark {
+      width: 32px;
+      height: 32px;
+      position: relative;
+      opacity: 0;
+    }
+
+    .checkmark::before,
+    .checkmark::after {
+      content: '';
+      position: absolute;
+      background: #10b981;
+      border-radius: 2px;
+    }
+
+    .checkmark::before {
+      width: 3px;
+      height: 0;
+      left: 10px;
+      top: 18px;
+      transform: rotate(45deg);
+      transform-origin: bottom left;
+    }
+
+    .checkmark::after {
+      width: 3px;
+      height: 0;
+      left: 18px;
+      top: 22px;
+      transform: rotate(-45deg);
+      transform-origin: bottom left;
+    }
+
+    .step-5.active .checkmark {
+      opacity: 1;
+    }
+
+    .step-5.active .checkmark::before {
+      animation: checkmarkDraw1 0.4s ease-out 0.2s forwards;
+    }
+
+    .step-5.active .checkmark::after {
+      animation: checkmarkDraw2 0.4s ease-out 0.4s forwards;
+    }
+
+    /* ============================================
+       CONNECTING LINES
+       ============================================ */
+    .connector {
+      flex: 1;
+      height: 2px;
+      background: #e0e0e0;
+      position: relative;
+      margin: 0 0.5rem;
+      min-width: 40px;
+      overflow: hidden;
+    }
+
+    .connector-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.6s ease-out;
+    }
+
+    .connector.active .connector-line {
+      width: 100%;
+    }
+
+    /* ============================================
+       STEP LABELS
+       ============================================ */
+    .step-label {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #999;
+      text-align: center;
+      transition: color 0.4s ease;
+    }
+
+    .step.active .step-label {
+      color: #1a1a1a;
+    }
+
+    /* ============================================
+       CAPTION
+       ============================================ */
+    .workflow-caption {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 1.125rem;
+      color: #666;
+      font-weight: 400;
+      opacity: 0;
+      animation: fadeIn 0.6s ease-out 0.4s forwards;
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes roomPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes linkExtend {
+      0% {
+        transform: scale(0) translateX(-10px);
+      }
+      100% {
+        transform: scale(1) translateX(0);
+      }
+    }
+
+    @keyframes linkPulse {
+      0%, 100% {
+        transform: scale(1) translateX(0);
+      }
+      50% {
+        transform: scale(1.15) translateX(2px);
+      }
+    }
+
+    @keyframes dotAppear {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes dotBounce {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        transform: translateY(-4px) scale(1.1);
+      }
+    }
+
+    @keyframes checkmarkDraw1 {
+      0% {
+        height: 0;
+      }
+      100% {
+        height: 10px;
+      }
+    }
+
+    @keyframes checkmarkDraw2 {
+      0% {
+        height: 0;
+      }
+      100% {
+        height: 6px;
+      }
+    }
+
+    /* ============================================
+       RESPONSIVE: VERTICAL ON MOBILE
+       ============================================ */
+    @media (max-width: 768px) {
+      .workflow-steps {
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .connector {
+        width: 2px;
+        height: 40px;
+        min-width: 0;
+        margin: 0.5rem 0;
+      }
+
+      .connector-line {
+        width: 100%;
+        height: 0;
+        transition: height 0.6s ease-out;
+      }
+
+      .connector.active .connector-line {
+        height: 100%;
+      }
+
+      .step {
+        min-width: 100%;
+      }
+
+      .workflow-container {
+        padding: 2rem 1rem;
+      }
+
+      .workflow-title {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+      }
+
+      .workflow-caption {
+        font-size: 1rem;
+        margin-top: 2rem;
+      }
+    }
+
+    /* ============================================
+       ACCESSIBILITY
+       ============================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workflow-container">
+    <div class="workflow-steps">
+      <!-- Step 1: Choose Tool -->
+      <div class="step step-1" data-step="1">
+        <div class="step-card">
+          <div class="tool-icons-container">
+            <div class="tool-icon ic" data-ic="layers" aria-hidden="true"></div>
+            <div class="tool-icon ic" data-ic="clipboard-list" aria-hidden="true"></div>
+            <div class="tool-icon ic" data-ic="pencil" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="step-label">Choose Tool</div>
+      </div>
+
+      <div class="connector" data-connector="1">
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Step 2: Create Room -->
+      <div class="step step-2" data-step="2">
+        <div class="step-card">
+          <div class="room-icon ic" data-ic="home" aria-hidden="true"></div>
+        </div>
+        <div class="step-label">Create Room</div>
+      </div>
+
+      <div class="connector" data-connector="2">
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Step 3: Share Link -->
+      <div class="step step-3" data-step="3">
+        <div class="step-card">
+          <div class="link-icon ic" data-ic="link" aria-hidden="true"></div>
+        </div>
+        <div class="step-label">Share Link</div>
+      </div>
+
+      <div class="connector" data-connector="3">
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Step 4: Collaborate -->
+      <div class="step step-4" data-step="4">
+        <div class="step-card">
+          <div class="collaboration-dots">
+            <div class="user-dot"></div>
+            <div class="user-dot"></div>
+            <div class="user-dot"></div>
+          </div>
+        </div>
+        <div class="step-label">Collaborate</div>
+      </div>
+
+      <div class="connector" data-connector="4">
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Step 5: Exit -->
+      <div class="step step-5" data-step="5">
+        <div class="step-card">
+          <div class="checkmark"></div>
+        </div>
+        <div class="step-label">Exit</div>
+      </div>
+    </div>
+
+    <div class="workflow-caption">
+      Create a room. Share a link. Get work done.
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================
+     * ANIMATION CONTROLLER
+     * ============================================
+     * 
+     * Controls the workflow animation sequence:
+     * - Each step activates for ~1.8 seconds
+     * - Total cycle: ~9 seconds (5 steps × 1.8s)
+     * - Loops continuously
+     * - Connectors animate when next step activates
+     */
+
+    class WorkflowAnimator {
+      constructor() {
+        this.steps = document.querySelectorAll('.step');
+        this.connectors = document.querySelectorAll('.connector');
+        this.currentStep = 0;
+        this.totalSteps = this.steps.length;
+        this.stepDuration = 1800; // 1.8 seconds per step
+        this.cycleDuration = this.stepDuration * this.totalSteps; // ~9 seconds total
+        
+        this.init();
+      }
+
+      init() {
+        // Start animation after initial load
+        setTimeout(() => {
+          this.startCycle();
+        }, 500);
+      }
+
+      /**
+       * Activates a specific step and deactivates others
+       * @param {number} stepIndex - Zero-based index of step to activate
+       */
+      activateStep(stepIndex) {
+        // Deactivate all steps
+        this.steps.forEach((step, index) => {
+          step.classList.remove('active');
+          if (index < this.connectors.length) {
+            this.connectors[index].classList.remove('active');
+          }
+        });
+
+        // Activate current step
+        if (stepIndex < this.totalSteps) {
+          this.steps[stepIndex].classList.add('active');
+          
+          // Special handling for step 1: activate one tool icon
+          if (stepIndex === 0) {
+            const toolIcons = this.steps[0].querySelectorAll('.tool-icon');
+            toolIcons.forEach(icon => icon.classList.remove('active-tool'));
+            // Activate the middle tool icon
+            if (toolIcons[1]) {
+              toolIcons[1].classList.add('active-tool');
+            }
+          }
+          
+          // Activate connector before current step (if exists)
+          if (stepIndex > 0 && stepIndex - 1 < this.connectors.length) {
+            this.connectors[stepIndex - 1].classList.add('active');
+          }
+        }
+      }
+
+      /**
+       * Starts the animation cycle
+       */
+      startCycle() {
+        // Reset to first step
+        this.currentStep = 0;
+        this.activateStep(this.currentStep);
+
+        // Advance through steps
+        const interval = setInterval(() => {
+          this.currentStep++;
+          
+          if (this.currentStep >= this.totalSteps) {
+            // Cycle complete - reset after brief pause
+            clearInterval(interval);
+            setTimeout(() => {
+              // Reset all states
+              this.steps.forEach(step => step.classList.remove('active'));
+              this.connectors.forEach(connector => connector.classList.remove('active'));
+              
+              // Restart cycle
+              setTimeout(() => {
+                this.startCycle();
+              }, 400); // Brief pause before restart
+            }, 600);
+          } else {
+            this.activateStep(this.currentStep);
+          }
+        }, this.stepDuration);
+      }
+    }
+
+    // Initialize animation when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        new WorkflowAnimator();
+      });
+    } else {
+      new WorkflowAnimator();
+    }
+  </script>
+  <script src="shared.js"></script>
+</body>
+</html>

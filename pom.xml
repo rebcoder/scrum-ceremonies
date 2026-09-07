@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.16</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.scrumceremonies</groupId>
+	<artifactId>scrum-ceremonies</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>scrum-ceremonies</name>
+	<description>Scrum Ceremonies - anonymous Planning Poker, Retro Board, Mood Check</description>
+	<url/>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+		<!-- Jackson is intentionally NOT pinned here — the Spring Boot 3.5 BOM
+		     manages jackson-bom (2.19.x). The old 2.17.3 pin existed to match
+		     Boot 3.3.13's jackson-bom; carried into 3.5 it would DOWNGRADE Jackson
+		     below the BOM (the exact skew it was meant to avoid). Let the BOM own it. -->
+
+		<!-- SECURITY BUMP AHEAD OF THE BOM: pins past CVE-2026-59901 in netty-codec.
+		     Netty is a BOM-managed transitive, so overriding the BOM's PROPERTY is the supported
+		     lever — not a new <dependency>, which would pin one artifact and strand netty's siblings
+		     (netty-common/handler/resolver/buffer/transport) at .135. Netty must move as a SET.
+
+		     DELIBERATE DEVIATION from the Jackson note above: that note is about not pinning BELOW
+		     the BOM. This pins ABOVE it, temporarily. REMOVE when a Boot 3.5.x patch carries
+		     4.1.136 or later, or it silently becomes the downgrade the note warns about. -->
+		<netty.version>4.1.136.Final</netty.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<!-- Micrometer Prometheus for metrics export -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- OpenAPI documentation (auto-generated from controllers) -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<!-- 2.8.x is the Spring Boot 3.5 line (2.6.0 targets Boot 3.3 and is
+			     incompatible with Framework 6.2). Note: springdoc >=2.8 defaults the
+			     emitted spec to OpenAPI 3.1 (was 3.0) — /api-docs JSON shape changes. -->
+			<version>2.8.17</version>
+		</dependency>
+		<!-- Testcontainers (Redis integration tests). Versions
+		     intentionally NOT pinned — the Spring Boot 3.5 BOM manages the
+		     testcontainers BOM (1.21.x); dropping the old 1.20.1 pins keeps the
+		     modules aligned to the Boot-managed version. -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- WebSocket testing -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- OWASP dependency-check is a Maven PLUGIN, not a library — it was
+		     wrongly declared here as a test <dependency> (dead: nothing compiled
+		     or tested against it). Its version is now pinned in
+		     <build><pluginManagement> so the CI CLI invocation
+		     (`mvn org.owasp:dependency-check-maven:check`) resolves the pinned
+		     version instead of "latest". -->
+		<!-- Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		
+		<!-- Spring Cache -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		
+		<!-- Caffeine Cache (L1 cache) -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+
+		<!-- RabbitMQ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
+		<!-- JSON serialization is provided by spring-boot-starter-web -->
+		<!-- No need for explicit jackson-databind dependency - Spring Boot manages it -->
+
+	</dependencies>
+
+	<build>
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+		<pluginManagement>
+			<plugins>
+				<!-- Pins the OWASP dependency-check version for the CLI-invoked goal
+				     (mvn org.owasp:dependency-check-maven:check). Not bound to any phase — it only runs
+				     when explicitly invoked. -->
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<!-- Pinned above the version the OWASP plugin BOM would otherwise resolve: an older
+					     minor version reads its vulnerability database from a differently-numbered cache
+					     directory than the one this tool populates, which combined with NVD rate-limiting
+					     anonymous API updates can make the scan abort with no report at all rather than
+					     fail loudly. Run with -DautoUpdate=false to use the existing local cache. -->
+					<version>12.1.9</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<!-- Version inherited from spring-boot-starter-parent (P1). Was pinned 3.8.1,
+				     which fails on JDK 21+ with "TypeTag :: UNKNOWN" during Lombok annotation
+				     processing; the Boot-managed version tracks modern JDKs. Target stays Java 17. -->
+				<configuration>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<!-- Version inherited from Boot-managed dependencyManagement (P1); resolved
+							     by compiler-plugin 3.12.0+ so it matches the lombok runtime dep above. -->
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<!-- No static asset pipeline here: the frontend is built by frontend/scripts/build.js and
+			     served by a static host. Backend is API-only (spring.web.resources.add-mappings=false). -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<!-- Maven Surefire Plugin for running tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- Version inherited from spring-boot-starter-parent (P1). -->
+				<configuration>
+					<includes>
+						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/Abstract*.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<!-- JaCoCo for code coverage (updated for Java 23 compatibility) -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>PACKAGE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.60</minimum>
+										</limit>
+									</limits>
+									<excludes>
+										<!-- ISSUE: legacy-grandfathered (main class, @SpringBootTest covers) -->
+										<exclude>com.scrumceremonies</exclude>
+										<!-- ISSUE: legacy-grandfathered (v1 controllers, covered by E2E API tests Journey 14) -->
+										<exclude>com.scrumceremonies.controller</exclude>
+									</excludes>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

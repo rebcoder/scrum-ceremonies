@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Structured JSON logging for production, plain text for dev -->
+
+    <!-- Plain text for local dev (default, dev, test profiles) -->
+    <springProfile name="default | dev | test">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <!-- T4: carry the MDC. RequestTracingFilter has always put requestId/userId/method/path into
+                     the MDC and NO pattern referenced them, so every one of those values reached ZERO log
+                     lines — the id existed and nothing carried it, which is useless at exactly the moment
+                     cross-request tracing is wanted. Setting logging.pattern.console in
+                     application.properties does NOT work: this file overrides it, and the properties line
+                     was silently inert until the output was actually read.
+                     %X{key:-} prints empty for non-request threads (schedulers, the async activity-log
+                     writer) rather than a literal placeholder. -->
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [req=%X{requestId:-} user=%X{userId:-}] - %msg%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <!-- Structured JSON for production -->
+    <springProfile name="prod">
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.JsonEncoder" />
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="JSON" />
+        </root>
+    </springProfile>
+</configuration>

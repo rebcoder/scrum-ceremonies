@@ -1,0 +1,31 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    # Everything in this Redis is public, anonymous, TTL'd room state — allkeys-lru
+    # is safe here and prevents the noeviction default from failing writes when
+    # memory fills.
+    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - APP_USE_SIMPLE_BROKER=true
+      - APP_CORS_ALLOWED_ORIGINS=http://localhost:8080,http://localhost,http://localhost:3000
+
+volumes:
+  redis_data:

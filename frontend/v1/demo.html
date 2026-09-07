@@ -1,0 +1,84 @@
+<!--
+  Copyright (c) 2026 rebcoder. MIT licensed — see LICENSE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Demo Mode - Scrum Ceremonies</title>
+  <meta name="description" content="Try Scrum Ceremonies's tools in demo mode. See how Planning Poker, Sprint Retrospective, and Team Mood Check work without creating real rooms." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Tool Selection Screen -->
+    <div id="tool-selection-screen" class="demo-screen">
+      <h1>Demo Mode</h1>
+      <p class="demo-subtitle">No real data, no real rooms</p>
+      <p class="demo-description">Explore how Scrum Ceremonies's tools work with step-by-step walkthroughs.</p>
+      
+      <div class="demo-tool-grid">
+        <div class="demo-tool-card" data-tool="poker">
+          <div class="demo-tool-icon ic" data-ic="layers" aria-hidden="true"></div>
+          <h3>Planning Poker</h3>
+          <p>Learn how teams estimate user stories using consensus-based voting.</p>
+          <button class="demo-start-btn" onclick="startDemo('poker')">Start Demo</button>
+        </div>
+        
+        <div class="demo-tool-card" data-tool="retro">
+          <div class="demo-tool-icon ic" data-ic="clipboard-list" aria-hidden="true"></div>
+          <h3>Sprint Retrospective</h3>
+          <p>See how teams collaborate on feedback boards with categorized columns.</p>
+          <button class="demo-start-btn" onclick="startDemo('retro')">Start Demo</button>
+        </div>
+        
+        <div class="demo-tool-card" data-tool="mood">
+          <div class="demo-tool-icon ic" data-ic="brain" aria-hidden="true"></div>
+          <h3>Team Mood Check</h3>
+          <p>Discover how teams anonymously share and track their mood.</p>
+          <button class="demo-start-btn" onclick="startDemo('mood')">Start Demo</button>
+        </div>
+      </div>
+      
+      <div class="demo-footer-actions">
+        <button class="demo-exit-btn" onclick="exitDemo()">← Back to Home</button>
+      </div>
+    </div>
+
+    <!-- Demo Walkthrough Screen -->
+    <div id="demo-walkthrough-screen" class="demo-screen" style="display: none;">
+      <div class="demo-header">
+        <button class="demo-back-btn" onclick="goBack()">← Back</button>
+        <h2 id="demo-tool-title">Demo Walkthrough</h2>
+        <button class="demo-exit-btn" onclick="exitDemo()">Exit Demo</button>
+      </div>
+      
+      <div class="demo-badge">Demo Mode — No real data, no real rooms</div>
+      
+      <div class="demo-content">
+        <div class="demo-image-container">
+          <img id="demo-image" src="" alt="Demo step" />
+          <div id="demo-highlight" class="demo-highlight"></div>
+        </div>
+        
+        <div class="demo-step-info">
+          <div class="demo-step-counter">
+            <span id="current-step">1</span> / <span id="total-steps">4</span>
+          </div>
+          <p id="demo-step-text" class="demo-step-text"></p>
+        </div>
+        
+        <div class="demo-navigation">
+          <button id="demo-prev-btn" class="demo-nav-btn" onclick="previousStep()" disabled>← Previous</button>
+          <button id="demo-next-btn" class="demo-nav-btn demo-nav-btn-primary" onclick="nextStep()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="demo.js"></script>
+  <script src="shared.js"></script>
+</body>
+</html>

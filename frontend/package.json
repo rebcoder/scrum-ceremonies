@@ -1,0 +1,15 @@
+{
+  "name": "scrum-ceremonies-frontend",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "Scrum Ceremonies frontend — build reads from v1/, outputs minified dist/",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "npx serve v1 -p 3000 --cors"
+  },
+  "devDependencies": {
+    "terser": "^5.24.0",
+    "clean-css": "^5.3.3"
+  }
+}

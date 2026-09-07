@@ -1,0 +1,402 @@
+/**
+ * ============================================
+ * DEMO MODE STYLES
+ * ============================================
+ * 
+ * Isolated styles for Demo Mode.
+ * Uses the same typography and color palette as the tool pages.
+ */
+
+/* Demo Screen Container */
+.demo-screen {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Demo Header */
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.demo-header h2 {
+  flex: 1;
+  text-align: center;
+  color: var(--secondary);
+  margin: 0;
+}
+
+/* Demo Badge */
+.demo-badge {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* Demo Subtitle and Description */
+.demo-subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 18px;
+  font-weight: 500;
+  margin: -10px 0 16px;
+}
+
+.demo-description {
+  text-align: center;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto 40px;
+}
+
+/* Tool Selection Grid */
+.demo-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 40px 0;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.demo-tool-card {
+  background: linear-gradient(135deg, #fff, #f8fafc);
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.demo-tool-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.demo-tool-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.demo-tool-card h3 {
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.demo-tool-card p {
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+/* Demo Buttons */
+.demo-start-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.demo-start-btn:hover {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
+}
+
+.demo-back-btn,
+.demo-exit-btn {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.demo-back-btn:hover,
+.demo-exit-btn:hover {
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  transform: translateY(-1px);
+}
+
+.demo-footer-actions {
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* Demo Content */
+.demo-content {
+  margin-top: 32px;
+}
+
+.demo-image-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: #f8fafc;
+}
+
+.demo-image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Highlight Overlay */
+.demo-highlight {
+  position: absolute;
+  border: 3px solid #f59e0b;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3), 0 0 20px rgba(245, 158, 11, 0.5);
+  pointer-events: none;
+  display: none;
+  animation: highlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes highlightPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3), 0 0 20px rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.4), 0 0 30px rgba(245, 158, 11, 0.7);
+  }
+}
+
+/* Demo Step Info */
+.demo-step-info {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.demo-step-counter {
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.demo-step-text {
+  color: #374151;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Demo Navigation */
+.demo-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.demo-nav-btn {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.demo-nav-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  transform: translateY(-2px);
+}
+
+.demo-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.demo-nav-btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+}
+
+.demo-nav-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .demo-screen {
+    padding: 24px 16px;
+  }
+  
+  .demo-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .demo-header h2 {
+    order: 2;
+  }
+  
+  .demo-back-btn {
+    order: 1;
+    width: 100%;
+  }
+  
+  .demo-exit-btn {
+    order: 3;
+    width: 100%;
+  }
+  
+  .demo-tool-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .demo-tool-card {
+    padding: 24px 20px;
+  }
+  
+  .demo-tool-icon {
+    font-size: 40px;
+  }
+  
+  .demo-tool-card h3 {
+    font-size: 20px;
+  }
+  
+  .demo-step-text {
+    font-size: 18px;
+  }
+  
+  .demo-navigation {
+    flex-direction: column;
+  }
+  
+  .demo-nav-btn {
+    width: 100%;
+  }
+  
+  .demo-image-container {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-screen {
+    padding: 20px 12px;
+  }
+  
+  .demo-subtitle {
+    font-size: 16px;
+  }
+  
+  .demo-description {
+    font-size: 14px;
+  }
+  
+  .demo-tool-card {
+    padding: 20px 16px;
+  }
+  
+  .demo-tool-icon {
+    font-size: 36px;
+  }
+  
+  .demo-tool-card h3 {
+    font-size: 18px;
+  }
+  
+  .demo-tool-card p {
+    font-size: 14px;
+  }
+  
+  .demo-step-text {
+    font-size: 16px;
+  }
+  
+  .demo-badge {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
+}
+
+/* Placeholder for missing screenshots */
+.demo-placeholder {
+  align-items: center;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border: 2px dashed #9ca3af;
+  border-radius: 12px;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.demo-placeholder-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.demo-placeholder-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.demo-placeholder-note {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .demo-tool-card,
+  .demo-highlight,
+  .demo-nav-btn,
+  .demo-start-btn,
+  .demo-back-btn,
+  .demo-exit-btn {
+    transition: none;
+    animation: none;
+  }
+}

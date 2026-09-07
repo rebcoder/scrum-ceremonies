@@ -1,0 +1,12 @@
+# robots.txt for Scrum Ceremonies (no domain assigned yet; see sitemap.xml)
+# Allow all crawlers including Googlebot
+
+User-agent: *
+Allow: /
+
+# Block actuator endpoints (internal monitoring/admin endpoints)
+Disallow: /actuator/
+
+# Sitemap
+# Sitemap: set once a domain exists (see sitemap.xml note)
+

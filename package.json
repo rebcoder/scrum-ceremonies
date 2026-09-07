@@ -1,0 +1,16 @@
+{
+  "name": "scrum-ceremonies",
+  "license": "MIT",
+  "private": true,
+  "description": "Scrum Ceremonies — anonymous Planning Poker, Retro Board, Mood Check",
+  "scripts": {
+    "e2e": "playwright test",
+    "build:frontend": "cd frontend && npm ci && node scripts/build.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@stomp/stompjs": "^7.3.0",
+    "http-server": "^14.1.1",
+    "ws": "^8.21.3"
+  }
+}

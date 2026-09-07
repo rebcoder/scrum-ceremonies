@@ -1,0 +1,237 @@
+<!--
+  Copyright (c) 2026 rebcoder. MIT licensed — see LICENSE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Team Mood Check - Free Team Sentiment Tool for Agile Teams | Scrum Ceremonies</title>
+  <meta name="description" content="Free Team Mood Check tool for agile teams. Quick pulse checks and comprehensive Scrum pulse surveys. No login required. Perfect for remote teams." />
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.write('<script src="config.local.js"><\/script>');
+  }
+  </script>
+  <script src="config.js"></script>
+  <script src="vendor/sockjs-1.6.1.min.js"></script>
+  <script src="vendor/stomp-2.3.3.min.js"></script>
+  <script src="cache-bust-utils.js"></script>
+  <!-- PDF Export Libraries -->
+  <script src="vendor/jspdf-2.5.1.umd.min.js" id="jspdf-script"></script>
+  <script src="vendor/html2canvas-1.4.1.min.js" id="html2canvas-script"></script>
+  <script>
+    (function() {
+      function initJsPDF() {
+        if (window.jspdf && window.jspdf.jsPDF) {
+          window.jsPDF = window.jspdf.jsPDF;
+        }
+      }
+      initJsPDF();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initJsPDF);
+      }
+      [100, 300, 500, 1000].forEach(delay => {
+        setTimeout(initJsPDF, delay);
+      });
+    })();
+  </script>
+</head>
+<body class="mood-page">
+
+<div class="container">
+  <div class="page-header">
+    <h1>Team Mood Check</h1>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"><span class="ic" data-ic="moon" aria-hidden="true"></span></button>
+  </div>
+  <hr />
+
+  <!-- Room Creation Section -->
+  <div id="room-section" class="join-game-container">
+    <div class="join-game-header">
+      <h2 class="join-game-title"><span aria-hidden="true" class="ic" data-ic="brain"></span> Create Mood Check Room</h2>
+      <p class="join-game-subtitle">Check in with your team's mood and sentiment!</p>
+    </div>
+
+    <div class="join-game-form">
+      <div class="form-field">
+        <label class="field-label" for="mood-name-input"><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name</label>
+        <div class="input-wrapper">
+          <input id="mood-name-input" class="custom-input" placeholder="Enter your name..." maxlength="20" required />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button id="create-room-btn" class="action-btn create-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+          <span class="btn-text">Create New Room</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-text">OR</span>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label" for="room-code-input"><span aria-hidden="true" class="ic" data-ic="home"></span> Room Code</label>
+        <div class="join-room-wrapper">
+          <div class="input-wrapper">
+            <input id="room-code-input" class="custom-input" placeholder="Enter 8-character room code" />
+          </div>
+          <button id="join-room-btn" class="action-btn join-btn">
+            <span class="btn-icon ic" aria-hidden="true" data-ic="target"></span>
+            <span class="btn-text">Join</span>
+          </button>
+        </div>
+        <span id="mood-join-error" class="error-message" role="alert" style="display:none;">Room not found. Check the code and try again.</span>
+        <div class="help-text"><span aria-hidden="true" class="ic" data-ic="lightbulb"></span> Share the room code with your team to collaborate in real time.</div>
+      </div>
+
+      <div class="form-footer">
+        <button id="go-home-btn" class="secondary-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="home"></span>
+          <span class="btn-text">Back to Home</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Use Section -->
+  <div id="mood-rules-section" class="rules-section">
+    <p class="rules-section-title"><span aria-hidden="true" class="ic" data-ic="clipboard-list"></span> How to Use Team Mood Check</p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="zap"></span> Quick Pulse</p>
+        <p>Fast 10-second mood check! Select an emoji that best represents your current mood. Perfect for daily standups and quick team check-ins.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="bar-chart"></span> Scrum Pulse</p>
+        <p>Comprehensive 5-question survey covering mood, confidence, workload, blockers, and optional feedback. Takes 45-60 seconds for deeper insights.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="users"></span> Team Participation</p>
+        <p>Share the room link with your team. Each participant enters their name and submits their responses. Responses are anonymous until results are revealed.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="search"></span> Results Reveal</p>
+        <p>Results are ONLY revealed manually by the host. The host sees real-time submission count and clicks "Reveal Results" when ready. Everyone sees the aggregated results simultaneously once revealed.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="crown"></span> Host Controls</p>
+        <p>The room creator is the host. Only the host can see how many participants have submitted and has the "Reveal Results" button. Hosts can reveal results at any time.</p>
+      </div>
+      <div class="rule-card">
+        <p class="rule-title"><span aria-hidden="true" class="ic" data-ic="share"></span> Export Results</p>
+        <p>Export your mood check results as a PDF to share with stakeholders, track trends over time, or document team sentiment for retrospectives.</p>
+      </div>
+    </div>
+
+    <div class="best-practices-box mood-variant" style="margin-top: 16px;">
+      <h4><span aria-hidden="true" class="ic" data-ic="star"></span> Best Practices for Effective Mood Checks</h4>
+      <ul>
+        <li><strong>Be consistent:</strong> Run mood checks at regular intervals (daily, weekly, or after sprints) to track trends</li>
+        <li><strong>Make it safe:</strong> Emphasize that responses are anonymous until results are revealed, encouraging honest feedback</li>
+        <li><strong>Host controls reveal:</strong> Only the host can reveal results. Monitor submission count and reveal when appropriate</li>
+        <li><strong>Act on insights:</strong> Use mood check results to identify patterns and address concerns in retrospectives</li>
+        <li><strong>Keep it quick:</strong> Use Quick Pulse for frequent checks, Scrum Pulse for deeper analysis</li>
+        <li><strong>Share results:</strong> Export and share PDF reports to keep the team and stakeholders informed about team health</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Room Info -->
+  <div id="room-info" class="room-info-section" style="display:none;">
+    <h2>
+      <span aria-hidden="true" class="ic" data-ic="home"></span> Room Code: <span id="room-code" class="room-code-value"></span>
+      <button id="copy-room-code-btn" class="copy-code-btn" title="Copy room code" aria-label="Copy room code">
+        <span class="copy-icon ic" aria-hidden="true" data-ic="clipboard-list"></span>
+      </button>
+    </h2>
+    <h3><span aria-hidden="true" class="ic" data-ic="user"></span> Your Name: <span id="user-name" class="user-name-value"></span></h3>
+    <h3 class="team-name-row">
+      <span aria-hidden="true" class="ic" data-ic="users"></span> Team: <span id="mood-team-name" class="team-name-value"></span>
+    </h3>
+    <h3 id="host-info" style="display:none; text-align: center;"><span aria-hidden="true" class="ic" data-ic="crown"></span> Hosted by: <span id="host-name" class="host-name-value"></span></h3>
+    <div id="submission-status" class="submission-status" style="display: none;">
+      <strong><span aria-hidden="true" class="ic" data-ic="bar-chart"></span> Submission Status</strong>
+      <div id="submission-count" class="submission-count-text"></div>
+    </div>
+    <div class="room-info-actions">
+      <button id="share-btn" class="v1-btn v1-btn-warning"><span aria-hidden="true" class="ic" data-ic="link"></span> Share</button>
+      <button id="reveal-results-btn" class="v1-btn v1-btn-danger" style="display: none;"><span aria-hidden="true" class="ic" data-ic="target"></span> Reveal Results</button>
+      <button id="export-pdf-btn" class="v1-btn v1-btn-success" style="display: none;"><span aria-hidden="true" class="ic" data-ic="share"></span> Export PDF</button>
+      <button id="go-home-top-btn" class="v1-btn v1-btn-ghost"><span aria-hidden="true" class="ic" data-ic="home"></span> Home</button>
+    </div>
+  </div>
+
+  <!-- Participants Toolbar -->
+  <div id="participants-toolbar" class="retro-toolbar-enhanced" style="display:none;">
+    <div class="toolbar-left">
+      <div class="participants-counter">
+        <div class="counter-row">
+          <span class="counter-icon ic" aria-hidden="true" data-ic="users"></span>
+          <span class="counter-text">Participants:</span>
+          <span id="mood-user-count" class="counter-number">0</span>
+        </div>
+        <div id="mood-team-members-list" class="team-members-list" style="display:none;"></div>
+      </div>
+      <div class="session-status">
+        <span class="status-icon ic" aria-hidden="true" data-ic="brain"></span>
+        <span class="status-text">Active Session</span>
+      </div>
+      <div class="session-status">
+        <span class="status-icon ic" aria-hidden="true" data-ic="user"></span>
+        <span class="status-text">Capacity: <span id="mood-current-users">0</span>/10</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode Selection Section -->
+  <div id="mode-selection-section" class="board-container" style="display:none;">
+    <div class="mode-selection-container">
+      <h2 class="poker-section-title">Choose Your Mode</h2>
+      <div class="mode-card" data-mode="quick" role="button" tabindex="0" aria-label="Quick Pulse — single question mood check">
+        <div class="mode-icon ic" aria-hidden="true" data-ic="zap"></div>
+        <div class="mode-title">Quick Pulse</div>
+        <div class="mode-description">Single question mood check. Takes about 10 seconds.</div>
+      </div>
+      <div class="mode-card" data-mode="scrum" role="button" tabindex="0" aria-label="Scrum Pulse — comprehensive 5-question survey">
+        <div class="mode-icon ic" aria-hidden="true" data-ic="bar-chart"></div>
+        <div class="mode-title">Scrum Pulse</div>
+        <div class="mode-description">Comprehensive 5-question survey. Takes 45-60 seconds.</div>
+      </div>
+      <div class="form-footer" style="margin-top: 16px;">
+        <button id="mood-mode-home-btn" class="secondary-btn">
+          <span class="btn-icon ic" aria-hidden="true" data-ic="home"></span>
+          <span class="btn-text">Back to Home</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Survey Section -->
+  <div id="survey-section" class="board-container" style="display:none;">
+    <div class="mood-survey-container" id="survey-container">
+      <!-- Survey content will be dynamically generated -->
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="results-section" class="board-container" style="display:none;">
+    <div class="results-container" id="results-container">
+      <!-- Results content will be dynamically generated -->
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" role="status"></div>
+</div>
+
+<script src="shared.js"></script>
+<script src="mood.js"></script>
+<script src="share-modal.js"></script>
+</body>
+</html>
